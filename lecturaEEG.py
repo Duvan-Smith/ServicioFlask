@@ -34,7 +34,7 @@ def print_raw(sample):
 #simulación de board 
 class CBoard:
     def start_stream(self,_print_raw):
-        iteraciones=100
+        iteraciones=150
         frecuencia=0.250 #simular la frecuencia
         for sample in range(iteraciones):
             time.sleep(frecuencia)
