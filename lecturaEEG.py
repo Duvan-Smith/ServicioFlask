@@ -3,7 +3,7 @@ import pika, sys, os
 import joblib
 import numpy as np
 import pandas as pd
-# from firebase import firebase
+from firebase import firebase
 
 model = joblib.load(r'C:\Users\Duvan\OneDrive\Documentos\TraingEEG\Results\results\RandoFores\model\Ex1.pkl')
 variables_usabilidad_Anterior=None
