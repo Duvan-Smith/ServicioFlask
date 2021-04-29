@@ -3,9 +3,11 @@ import pika, sys, os
 import joblib
 import numpy as np
 import pandas as pd
+# from firebase import firebase
 
 model = joblib.load(r'C:\Users\Duvan\OneDrive\Documentos\TraingEEG\Results\results\RandoFores\model\Ex1.pkl')
 variables_usabilidad_Anterior=None
+variables_usabilidad_Comparar=None
 satisfaccion=[]
 s2=[]
 
@@ -21,7 +23,15 @@ def Medir_Satisfaccion(sample):
 def Guardar_datos(variables_usabilidad,medida_de_satisfaccion):
     data=np.array(medida_de_satisfaccion)
     satisfaccionG=np.average(data)#se tiene el promedio
+    print()
+    print("variables_usabilidad:",variables_usabilidad)
+    print("medida_de_satisfaccion:",medida_de_satisfaccion)
     print("promedio:",satisfaccionG)
+    # firebase = firebase.FirebaseApplication('https://console.firebase.google.com/project/pagina-personalizable', None)
+    # new_user = 'Ozgur Vatansever'
+
+    # result = firebase.post('/users', new_user, {'print': 'pretty'}, {'X_FANCY_HEADER': 'VERY FANCY'})
+    # print(result)
     # medida_de_satisfaccion=sacar el promedio
     # sumar y con lend da el promedio - 
     #Se guarda el promedio y las bariables lend y filter==1,filter==0 y eso se guarda
@@ -42,48 +52,31 @@ def Leer_mensaje():
 #simulación de print_raw
 def print_raw(sample):
     global variables_usabilidad_Anterior
+    global variables_usabilidad_Comparar
     global satisfaccion
-    global s2
+
     variables_usabilidad=Leer_mensaje()
-    print("No se guarda")
+
     if(variables_usabilidad!=None and variables_usabilidad_Anterior==None):
-        s1=satisfaccion.append(Medir_Satisfaccion(sample)) #clasifica sample con el modelo entrenado
-        s2.append(s1)
-        print("if1")
-        for s in satisfaccion:
-            print("rts:",s)
-        for s in s2:
-            print("rts2:",s)
-        print()
+        satisfaccion.append(Medir_Satisfaccion(sample)) #clasifica sample con el modelo entrenado
     elif(variables_usabilidad!=variables_usabilidad_Anterior and variables_usabilidad_Anterior!=None):
-        s3=satisfaccion.append(Medir_Satisfaccion(sample)) #clasifica sample con el modelo entrenado
-        s2.append(s3)
-        print("elif1")
-        for s in satisfaccion:
-            print("rts3:",s)
-        for s in s2:
-            print("rts4:",s)
-        print()
+        satisfaccion.append(Medir_Satisfaccion(sample)) #clasifica sample con el modelo entrenado
 
     if(variables_usabilidad!=None):
-        variables_usabilidad_Anterior=variables_usabilidad
-        # satisfaccion=[]
-        # print("variables_usabilidad",variables_usabilidad)
-        # print("variables_usabilidad_Anterior",variables_usabilidad_Anterior)
-        print("if3",variables_usabilidad_Anterior)
-        print()
-
-    if((variables_usabilidad!=variables_usabilidad_Anterior) and (variables_usabilidad_Anterior!=None)):
-        print("Se guarda ->",sample)
+            variables_usabilidad_Comparar=variables_usabilidad_Anterior
+            variables_usabilidad_Anterior=variables_usabilidad
+            
+    if(variables_usabilidad_Comparar!=None and variables_usabilidad!=None and variables_usabilidad_Comparar!=variables_usabilidad_Anterior):
         Guardar_datos(variables_usabilidad_Anterior,satisfaccion) # guarda los datos en firebase
         satisfaccion=[]
-        
+    else:
+        print("No se guarda")
 
 #simulación de board 
 class CBoard:
     def start_stream(self,_print_raw):
         iteraciones=150
-        frecuencia=0.325 #simular la frecuencia
+        frecuencia=1 #simular la frecuencia
         data = pd.read_csv(r"C:\Users\Duvan\OneDrive\Documentos\TraingEEG\DataSetConstruido\User1SerCsvMaOne.csv",)
         data = np.array(data, dtype="float")
         for d in data:
