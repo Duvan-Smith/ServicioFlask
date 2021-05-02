@@ -4,10 +4,12 @@ import joblib
 import numpy as np
 import pandas as pd
 from firebase import firebase
+import json
 
 model = joblib.load(r'C:\Users\Duvan\OneDrive\Documentos\TraingEEG\Results\results\RandoFores\model\Ex1.pkl')
 variables_usabilidad_Anterior=None
 variables_usabilidad_Comparar=None
+firebaseV=None
 satisfaccion=[]
 s2=[]
 
@@ -21,13 +23,39 @@ def Medir_Satisfaccion(sample):
     #Deben estar los filtros=crear funcion
     return Predition(sample)[0]
 def Guardar_datos(variables_usabilidad,medida_de_satisfaccion):
+    global firebaseV
     data=np.array(medida_de_satisfaccion)
     satisfaccionG=np.average(data)#se tiene el promedio
     print()
     print("variables_usabilidad:",variables_usabilidad)
     print("medida_de_satisfaccion:",medida_de_satisfaccion)
     print("promedio:",satisfaccionG)
-    # firebase = firebase.FirebaseApplication('https://console.firebase.google.com/project/pagina-personalizable', None)
+    firebaseV = firebase.FirebaseApplication("https://pagina-personalizable-default-rtdb.firebaseio.com/", None)
+    # line = json.dumps(variables_usabilidad) + '\n'
+    # print(line)
+    # print(json.dumps(variables_usabilidad))
+    # componenteUser={
+    #     'variables_usabilidad':variables_usabilidad,
+    #     "medida_de_satisfaccion:":medida_de_satisfaccion,
+    #     "promedio:":satisfaccionG
+    # }
+    componenteUser={
+        "componente":variables_usabilidad.decode("utf-8"),
+        "eeg":medida_de_satisfaccion,
+        "promedio":satisfaccionG
+    }
+    new_user = 'Ozgur Vatansever'
+    new_componente = '/componenteUser/'+'Ozgur Vatansever'
+    print()
+    result=firebaseV.post(new_componente,componenteUser)
+    print("post",result)
+    print()
+    # result = firebaseV.get('/componenteUser', None)
+    # print("get",result)
+    # print()
+    # result = firebaseV.get('/componenteUser/-MZczgyC875iucwJ4Du3', None)
+    # print("getId",result)
+    # print()
     # new_user = 'Ozgur Vatansever'
 
     # result = firebase.post('/users', new_user, {'print': 'pretty'}, {'X_FANCY_HEADER': 'VERY FANCY'})
@@ -37,8 +65,8 @@ def Guardar_datos(variables_usabilidad,medida_de_satisfaccion):
     #Se guarda el promedio y las bariables lend y filter==1,filter==0 y eso se guarda
     #una librería en firebase
     #http://ozgur.github.io/python-firebase/
-    pass
     #cuardar en firebase los datos obtenidos
+
 def Leer_mensaje():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
@@ -70,7 +98,8 @@ def print_raw(sample):
         Guardar_datos(variables_usabilidad_Anterior,satisfaccion) # guarda los datos en firebase
         satisfaccion=[]
     else:
-        print("No se guarda")
+        print("No se guarda:",sample)
+        print("Shape:",sample.shape)
 
 #simulación de board 
 class CBoard:
@@ -84,12 +113,6 @@ class CBoard:
             d2=np.delete(d, 10)#Esta linea se eliminara al trabajar con los datos reales
             sample=np.array([d2])
             _print_raw(sample)
-        # for sample in range(iteraciones):
-        #     time.sleep(frecuencia)
-        #     _print_raw(sample)
 
-
-#la info de la documentación es así
-#board = OpenBCICyton(port='COM5', daisy=False)
 board = CBoard()
 board.start_stream(print_raw)

@@ -53,6 +53,8 @@ def Leer_mensaje():
 #simulación de print_raw
 def print_raw(sample):
     sample=sample.channels_data
+    sample=sample[0:10]
+    sample=np.array([sample])
     global variables_usabilidad_Anterior
     global variables_usabilidad_Comparar
     global satisfaccion
@@ -72,34 +74,9 @@ def print_raw(sample):
         Guardar_datos(variables_usabilidad_Anterior,satisfaccion) # guarda los datos en firebase
         satisfaccion=[]
     else:
-        print("No se guarda")
-
-#simulación de board 
-# class CBoard:
-#     def start_stream(self,_print_raw):
-#         iteraciones=150
-#         frecuencia=1 #simular la frecuencia
-#         data = pd.read_csv(r"C:\Users\Duvan\OneDrive\Documentos\TraingEEG\DataSetConstruido\User1SerCsvMaOne.csv",)
-#         data = np.array(data, dtype="float")
-#         for d in data:
-#             time.sleep(frecuencia)
-#             d2=np.delete(d, 10)#Esta linea se eliminara al trabajar con los datos reales
-#             sample=np.array([d2])
-#             _print_raw(sample)
-        # for sample in range(iteraciones):
-        #     time.sleep(frecuencia)
-        #     _print_raw(sample)
-
-
-#la info de la documentación es así
-#board = OpenBCICyton(port='COM5', daisy=False)
-
-# board = CBoard()
-# board.start_stream(print_raw)
-# def print_raw(sample):
-#     print(sample.channels_data)
-
-# board = OpenBCICyton(port='COM5', daisy=True) #Para windows, verificar port
+        print("No se guarda:",sample)
+        print("shape:",sample.shape)
+        
 board = OpenBCICyton(daisy=True) # Probar
 
 board.start_stream(print_raw)
