@@ -9,9 +9,8 @@ import json
 model = joblib.load(r'C:\Users\Duvan\OneDrive\Documentos\TraingEEG\Results\results\RandoFores\model\Ex1.pkl')
 variables_usabilidad_Anterior=None
 variables_usabilidad_Comparar=None
-firebaseV=None
 satisfaccion=[]
-s2=[]
+firebaseV=None
 
 def Predition(data):
     return model.predict(data)
@@ -27,45 +26,26 @@ def Guardar_datos(variables_usabilidad,medida_de_satisfaccion):
     data=np.array(medida_de_satisfaccion)
     satisfaccionG=np.average(data)#se tiene el promedio
     print()
-    print("variables_usabilidad:",variables_usabilidad)
-    print("medida_de_satisfaccion:",medida_de_satisfaccion)
-    print("promedio:",satisfaccionG)
+    variables_usabilidad=variables_usabilidad.decode("utf-8")
+
+    new_user = variables_usabilidad[variables_usabilidad.find('"uid":"'):variables_usabilidad.find('","color"')]
+    print(new_user)
+    new_user=new_user[7:]
+    print(new_user)
+
     firebaseV = firebase.FirebaseApplication("https://pagina-personalizable-default-rtdb.firebaseio.com/", None)
-    # line = json.dumps(variables_usabilidad) + '\n'
-    # print(line)
-    # print(json.dumps(variables_usabilidad))
-    # componenteUser={
-    #     'variables_usabilidad':variables_usabilidad,
-    #     "medida_de_satisfaccion:":medida_de_satisfaccion,
-    #     "promedio:":satisfaccionG
-    # }
     componenteUser={
-        "componente":variables_usabilidad.decode("utf-8"),
+        "user":new_user,
+        "componente":variables_usabilidad,
         "eeg":medida_de_satisfaccion,
         "promedio":satisfaccionG
     }
-    new_user = 'Ozgur Vatansever'
-    new_componente = '/componenteUser/'+'Ozgur Vatansever'
+    new_componente = '/componenteUser/'+new_user
     print()
     result=firebaseV.post(new_componente,componenteUser)
     print("post",result)
     print()
-    # result = firebaseV.get('/componenteUser', None)
-    # print("get",result)
-    # print()
-    # result = firebaseV.get('/componenteUser/-MZczgyC875iucwJ4Du3', None)
-    # print("getId",result)
-    # print()
-    # new_user = 'Ozgur Vatansever'
-
-    # result = firebase.post('/users', new_user, {'print': 'pretty'}, {'X_FANCY_HEADER': 'VERY FANCY'})
-    # print(result)
-    # medida_de_satisfaccion=sacar el promedio
-    # sumar y con lend da el promedio - 
-    #Se guarda el promedio y las bariables lend y filter==1,filter==0 y eso se guarda
-    #una librería en firebase
     #http://ozgur.github.io/python-firebase/
-    #cuardar en firebase los datos obtenidos
 
 def Leer_mensaje():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
@@ -87,19 +67,25 @@ def print_raw(sample):
 
     if(variables_usabilidad!=None and variables_usabilidad_Anterior==None):
         satisfaccion.append(Medir_Satisfaccion(sample)) #clasifica sample con el modelo entrenado
+
     elif(variables_usabilidad!=variables_usabilidad_Anterior and variables_usabilidad_Anterior!=None):
         satisfaccion.append(Medir_Satisfaccion(sample)) #clasifica sample con el modelo entrenado
 
     if(variables_usabilidad!=None):
-            variables_usabilidad_Comparar=variables_usabilidad_Anterior
-            variables_usabilidad_Anterior=variables_usabilidad
+        variables_usabilidad_Comparar=variables_usabilidad_Anterior
+        variables_usabilidad_Anterior=variables_usabilidad
             
     if(variables_usabilidad_Comparar!=None and variables_usabilidad!=None and variables_usabilidad_Comparar!=variables_usabilidad_Anterior):
-        Guardar_datos(variables_usabilidad_Anterior,satisfaccion) # guarda los datos en firebase
+        Guardar_datos(variables_usabilidad_Comparar,satisfaccion) # guarda los datos en firebase
         satisfaccion=[]
+        if("FinTomaMuestraUsuario" in variables_usabilidad.decode("utf-8")):
+            print("Entro en FinTomaMuestraUsuario")
+            variables_usabilidad=None
+            variables_usabilidad_Anterior=None
+            variables_usabilidad_Comparar=None
+            satisfaccion=[]
     else:
-        print("No se guarda:",sample)
-        print("Shape:",sample.shape)
+        print("Sample:",sample)
 
 #simulación de board 
 class CBoard:
