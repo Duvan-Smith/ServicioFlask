@@ -80,3 +80,5 @@ def print_raw(sample):
 board = OpenBCICyton(daisy=True) # Probar
 
 board.start_stream(print_raw)
+#perform_bandpass()
+#https://brainflow.readthedocs.io/en/stable/UserAPI.html#brainflow-data-filter

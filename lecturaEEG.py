@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from firebase import firebase
 import json
+import mne
 
 model = joblib.load(r'C:\Users\Duvan\OneDrive\Documentos\TraingEEG\Results\results\RandoFores\model\Ex1.pkl')
 variables_usabilidad_Anterior=None
@@ -14,6 +15,12 @@ firebaseV=None
 
 def Predition(data):
     return model.predict(data)
+
+# def filters(raw,lowfrec,highpass):
+#     raw_highpass = raw.filter(l_freq=lowfrec, h_freq=highpass)
+#     freqs = (60)
+#     raw_notch_fit = raw_highpass.notch_filter(freqs=freqs, method='spectrum_fit', filter_length='12s')
+#     return raw_notch_fit
 
 #leer mensaje
 def Medir_Satisfaccion(sample):
@@ -27,19 +34,63 @@ def Guardar_datos(variables_usabilidad,medida_de_satisfaccion):
     satisfaccionG=np.average(data)#se tiene el promedio
     print()
     variables_usabilidad=variables_usabilidad.decode("utf-8")
+    print(variables_usabilidad)
+    print()
 
     new_user = variables_usabilidad[variables_usabilidad.find('"uid":"'):variables_usabilidad.find('","color"')]
-    print(new_user)
     new_user=new_user[7:]
-    print(new_user)
+
+    save_color = variables_usabilidad[variables_usabilidad.find('"color":"'):variables_usabilidad.find('","posicionLetra":"')]
+    save_color=save_color[9:]
+
+    save_pletra = variables_usabilidad[variables_usabilidad.find('","posicionLetra":"'):variables_usabilidad.find('","letra":{"nombre":"')]
+    save_pletra=save_pletra[19:]
+
+    save_titulo = variables_usabilidad[variables_usabilidad.find(',"titulo":"'):variables_usabilidad.find('","subtitulo":"')]
+    save_titulo=save_titulo[11:]
+
+    aux_letra=save_pletra+'","letra":'
+    print(aux_letra,len(aux_letra))
+    aux_letra2=',"titulo":"'+save_titulo
+
+    save_letra = variables_usabilidad[variables_usabilidad.find(aux_letra):variables_usabilidad.rfind(aux_letra2)]
+    save_letra=save_letra[len(aux_letra):]
+    print(save_letra)
+
+    
+
+    save_subtitulo = variables_usabilidad[variables_usabilidad.find('","subtitulo":"'):variables_usabilidad.find('","parrafos":')]
+    save_subtitulo=save_subtitulo[15:]
+
+    save_parrafos = variables_usabilidad[variables_usabilidad.find('","parrafos":'):variables_usabilidad.find(',"imagen":"')]
+    save_parrafos=save_parrafos[13:]
+
+    aux_imagen=save_parrafos+',"imagen":"'
+    save_imagen = variables_usabilidad[variables_usabilidad.rfind(aux_imagen):variables_usabilidad.find('","contenidos":{')]
+    save_imagen=save_imagen[13:]
+    print()
+
+    save_contenidos = variables_usabilidad[variables_usabilidad.find('","contenidos":'):variables_usabilidad.rfind('}')]
+    save_contenidos=save_contenidos[15:]
+    print()
 
     firebaseV = firebase.FirebaseApplication("https://pagina-personalizable-default-rtdb.firebaseio.com/", None)
+
     componenteUser={
         "user":new_user,
-        "componente":variables_usabilidad,
         "eeg":medida_de_satisfaccion,
-        "promedio":satisfaccionG
+        "promedio":satisfaccionG,
+        "color":save_color,
+        "posicionLetra":save_pletra,
+        "letra":save_letra,
+        "titulo":save_titulo,
+        "subtitulo":save_subtitulo,
+        "parrafos":save_parrafos,
+        "imagen":save_imagen,
+        "contenidos":save_contenidos,
+        # "componente":variables_usabilidad,
     }
+
     new_componente = '/componenteUser/'+new_user
     print()
     result=firebaseV.post(new_componente,componenteUser)
@@ -64,6 +115,8 @@ def print_raw(sample):
     global satisfaccion
 
     variables_usabilidad=Leer_mensaje()
+
+    # sample=filters(sample,1,40)
 
     if(variables_usabilidad!=None and variables_usabilidad_Anterior==None):
         satisfaccion.append(Medir_Satisfaccion(sample)) #clasifica sample con el modelo entrenado
