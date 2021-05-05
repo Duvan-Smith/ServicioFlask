@@ -32,6 +32,10 @@ def user():
 def personalizacion():
     return render_template('index.html')
 
+@app.route('/micomponente',methods=['GET'])
+def micomponente():
+    return render_template('index.html')
+
 @app.route('/demo',methods=['GET'])
 def demo():
     return render_template('index.html')

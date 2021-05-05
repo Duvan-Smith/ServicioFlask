@@ -30,49 +30,26 @@ def Medir_Satisfaccion(sample):
     return Predition(sample)[0]
 def Guardar_datos(variables_usabilidad,medida_de_satisfaccion):
     global firebaseV
+
     data=np.array(medida_de_satisfaccion)
     satisfaccionG=np.average(data)#se tiene el promedio
+
     print()
-    variables_usabilidad=variables_usabilidad.decode("utf-8")
-    print(variables_usabilidad)
+    data = json.loads(variables_usabilidad)
+    print("json1:",data)
+    print("color:",data['color'])
+    print("letra:",data['letra'])
     print()
-
-    new_user = variables_usabilidad[variables_usabilidad.find('"uid":"'):variables_usabilidad.find('","color"')]
-    new_user=new_user[7:]
-
-    save_color = variables_usabilidad[variables_usabilidad.find('"color":"'):variables_usabilidad.find('","posicionLetra":"')]
-    save_color=save_color[9:]
-
-    save_pletra = variables_usabilidad[variables_usabilidad.find('","posicionLetra":"'):variables_usabilidad.find('","letra":{"nombre":"')]
-    save_pletra=save_pletra[19:]
-
-    save_titulo = variables_usabilidad[variables_usabilidad.find(',"titulo":"'):variables_usabilidad.find('","subtitulo":"')]
-    save_titulo=save_titulo[11:]
-
-    aux_letra=save_pletra+'","letra":'
-    print(aux_letra,len(aux_letra))
-    aux_letra2=',"titulo":"'+save_titulo
-
-    save_letra = variables_usabilidad[variables_usabilidad.find(aux_letra):variables_usabilidad.rfind(aux_letra2)]
-    save_letra=save_letra[len(aux_letra):]
-    print(save_letra)
-
     
-
-    save_subtitulo = variables_usabilidad[variables_usabilidad.find('","subtitulo":"'):variables_usabilidad.find('","parrafos":')]
-    save_subtitulo=save_subtitulo[15:]
-
-    save_parrafos = variables_usabilidad[variables_usabilidad.find('","parrafos":'):variables_usabilidad.find(',"imagen":"')]
-    save_parrafos=save_parrafos[13:]
-
-    aux_imagen=save_parrafos+',"imagen":"'
-    save_imagen = variables_usabilidad[variables_usabilidad.rfind(aux_imagen):variables_usabilidad.find('","contenidos":{')]
-    save_imagen=save_imagen[13:]
-    print()
-
-    save_contenidos = variables_usabilidad[variables_usabilidad.find('","contenidos":'):variables_usabilidad.rfind('}')]
-    save_contenidos=save_contenidos[15:]
-    print()
+    new_user=data['uid']
+    save_color=data['color']
+    save_pletra=data['posicionLetra']
+    save_letra=data['letra']
+    save_titulo=data['titulo']
+    save_subtitulo=data['subtitulo']
+    save_parrafos=data['parrafos']
+    save_imagen=data['imagen']
+    save_contenidos=data['contenidos']
 
     firebaseV = firebase.FirebaseApplication("https://pagina-personalizable-default-rtdb.firebaseio.com/", None)
 
