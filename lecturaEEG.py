@@ -7,7 +7,7 @@ from firebase import firebase
 import json
 import mne
 
-model = joblib.load(r'C:\Users\Duvan\OneDrive\Documentos\TraingEEG\Results\results\RandoFores\model\Ex1.pkl')
+model = joblib.load(r'C:\Users\Asus\Documents\GitHub\Tesis\ServicioFlask\Recursos\Ex1.pkl')
 variables_usabilidad_Anterior=None
 variables_usabilidad_Comparar=None
 satisfaccion=[]
@@ -122,7 +122,7 @@ class CBoard:
     def start_stream(self,_print_raw):
         iteraciones=150
         frecuencia=1 #simular la frecuencia
-        data = pd.read_csv(r"C:\Users\Duvan\OneDrive\Documentos\TraingEEG\DataSetConstruido\User1SerCsvMaOne.csv",)
+        data = pd.read_csv(r"C:\Users\Asus\Documents\GitHub\Tesis\ServicioFlask\Recursos\User1SerCsvMaOne.csv",)
         data = np.array(data, dtype="float")
         for d in data:
             time.sleep(frecuencia)
