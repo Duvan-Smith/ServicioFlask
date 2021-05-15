@@ -56,7 +56,6 @@ def Guardar_datos(variables_usabilidad,medida_de_satisfaccion):
         "parrafos":save_parrafos,
         "imagen":save_imagen,
         "contenidos":save_contenidos,
-        # "componente":variables_usabilidad,
     }
 
     new_componente = '/componenteUser/'+new_user

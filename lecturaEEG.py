@@ -6,6 +6,10 @@ import pandas as pd
 from firebase import firebase
 import json
 import mne
+import scipy
+from scipy import stats
+from scipy.signal import filtfilt
+from scipy import signal
 
 model = joblib.load(r'C:\Users\Asus\Documents\GitHub\Tesis\ServicioFlask\Recursos\Ex1.pkl')
 variables_usabilidad_Anterior=None
@@ -16,18 +20,30 @@ firebaseV=None
 def Predition(data):
     return model.predict(data)
 
-# def filters(raw,lowfrec,highpass):
-#     raw_highpass = raw.filter(l_freq=lowfrec, h_freq=highpass)
-#     freqs = (60)
-#     raw_notch_fit = raw_highpass.notch_filter(freqs=freqs, method='spectrum_fit', filter_length='12s')
-#     return raw_notch_fit
+def filters(sample,lowfrec,highpass):
+    raw_highpass = sample.filter(l_freq=lowfrec, h_freq=highpass)
+    freqs = (60)
+    raw_notch_fit = raw_highpass.notch_filter(freqs=freqs, method='spectrum_fit', filter_length='12s')
+    return raw_notch_fit
+    
+def notch_filter(val, data, fs=250):
+    notch_freq_Hz = np.array([float(val)])
+    for freq_Hz in np.nditer(notch_freq_Hz):
+        bp_stop_Hz = freq_Hz + 3.0 * np.array([-1, 1])
+        b, a = signal.butter(3, bp_stop_Hz / (fs / 2.0), 'bandstop')
+        fin = data = signal.lfilter(b, a, data)
+    return fin
 
-#leer mensaje
+# Bandpass filter
+def bandpass(start, stop, data, fs = 250):
+    bp_Hz = np.array([start, stop])
+    b, a = signal.butter(5, bp_Hz / (fs / 2.0), btype='bandpass')
+    return signal.lfilter(b, a, data, axis=0)
+
+# leer mensaje
 def Medir_Satisfaccion(sample):
-    #Extraer de la lectura un array con la forma(shape) requerido por el modelo entrenado
-    #el valor debe ser el porcentaje
-    #Deben estar los filtros=crear funcion
     return Predition(sample)[0]
+
 def Guardar_datos(variables_usabilidad,medida_de_satisfaccion):
     global firebaseV
 
@@ -65,7 +81,6 @@ def Guardar_datos(variables_usabilidad,medida_de_satisfaccion):
         "parrafos":save_parrafos,
         "imagen":save_imagen,
         "contenidos":save_contenidos,
-        # "componente":variables_usabilidad,
     }
 
     new_componente = '/componenteUser/'+new_user
@@ -93,7 +108,16 @@ def print_raw(sample):
 
     variables_usabilidad=Leer_mensaje()
 
-    # sample=filters(sample,1,40)
+    print("Sampleya:",sample.shape)
+    print("Sampleya:",sample)
+    print()
+    
+    sample = bandpass(1, 40, sample)
+    print("bandpass:",sample)
+    print()
+    sample = notch_filter(60, sample)
+    print("notch_filter:",sample)
+    print()
 
     if(variables_usabilidad!=None and variables_usabilidad_Anterior==None):
         satisfaccion.append(Medir_Satisfaccion(sample)) #clasifica sample con el modelo entrenado
@@ -126,8 +150,9 @@ class CBoard:
         data = np.array(data, dtype="float")
         for d in data:
             time.sleep(frecuencia)
-            d2=np.delete(d, 10)#Esta linea se eliminara al trabajar con los datos reales
-            sample=np.array([d2])
+            sample=np.delete(d, 10)#Esta linea se eliminara al trabajar con los datos reales
+            sample=np.array([sample])
+            sample=np.array(sample)
             _print_raw(sample)
 
 board = CBoard()
