@@ -19,12 +19,6 @@ firebaseV=None
 
 def Predition(data):
     return model.predict(data)
-
-def filters(sample,lowfrec,highpass):
-    raw_highpass = sample.filter(l_freq=lowfrec, h_freq=highpass)
-    freqs = (60)
-    raw_notch_fit = raw_highpass.notch_filter(freqs=freqs, method='spectrum_fit', filter_length='12s')
-    return raw_notch_fit
     
 def notch_filter(val, data, fs=250):
     notch_freq_Hz = np.array([float(val)])
@@ -108,16 +102,9 @@ def print_raw(sample):
 
     variables_usabilidad=Leer_mensaje()
 
-    print("Sampleya:",sample.shape)
-    print("Sampleya:",sample)
-    print()
-    
+    #Se ponen los mismos filtros utilizados para el entrenamiento del algoritmo
     sample = bandpass(1, 40, sample)
-    print("bandpass:",sample)
-    print()
     sample = notch_filter(60, sample)
-    print("notch_filter:",sample)
-    print()
 
     if(variables_usabilidad!=None and variables_usabilidad_Anterior==None):
         satisfaccion.append(Medir_Satisfaccion(sample)) #clasifica sample con el modelo entrenado
