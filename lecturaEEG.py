@@ -60,6 +60,7 @@ def Guardar_datos(variables_usabilidad,medida_de_satisfaccion):
     save_parrafos=data['parrafos']
     save_imagen=data['imagen']
     save_contenidos=data['contenidos']
+    save_fechaYHora=data['fechaYHora']
 
     firebaseV = firebase.FirebaseApplication("https://pagina-personalizable-default-rtdb.firebaseio.com/", None)
 
@@ -75,6 +76,7 @@ def Guardar_datos(variables_usabilidad,medida_de_satisfaccion):
         "parrafos":save_parrafos,
         "imagen":save_imagen,
         "contenidos":save_contenidos,
+        "fechaYHora":save_fechaYHora,
     }
 
     new_componente = '/componenteUser/'+new_user
