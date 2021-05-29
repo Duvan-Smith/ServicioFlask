@@ -12,7 +12,7 @@ from scipy import stats
 from scipy.signal import filtfilt
 from scipy import signal
 
-model = joblib.load(r'C:\Users\Duvan\OneDrive\Documentos\TraingEEG\Results\results\RandoFores\model\Ex1.pkl')
+model = joblib.load(r'C:\Users\Asus\Documents\GitHub\Tesis\ServicioFlask\Recursos\Ex1.pkl')
 variables_usabilidad_Anterior=None
 variables_usabilidad_Comparar=None
 satisfaccion=[]
@@ -133,6 +133,7 @@ def print_raw(sample):
             satisfaccion=[]
     else:
         print("Sample:",sample)
+    print(satisfaccion)
         
 board = OpenBCICyton(daisy=True)
 
